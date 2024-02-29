@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Xml.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TranslationManagement.Api.Controllers;
+using TranslationManagement.Api.Extentions;
 using TranslationManagement.Api.Models;
 using TranslationManagement.Api.Services.Interfaces;
 using TranslationManagement.Api.ViewModels;
@@ -33,7 +37,16 @@ namespace TranslationManagement.Api.Controlers
         [HttpGet]
         public ActionResult Get()
         {
-            return new JsonResult(_service.GetAll());
+            try
+            {
+                var dbObjects = _service.GetAll();
+                List<TranslatorResponseViewModel> viewModels = _mapper.Map<IEnumerable<Translator>, List<TranslatorResponseViewModel>>(dbObjects);
+                return JsonResult(200, viewModels);
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
         }
 
         //[HttpGet("{id}")]
@@ -45,43 +58,113 @@ namespace TranslationManagement.Api.Controlers
         [HttpGet("[action]")]
         public ActionResult GetByName(string name)
         {
-            return new JsonResult(_translatorService.GetByName(name));
+            try
+            {
+                var dbObjects = _translatorService.GetByName(name);
+                List<TranslatorResponseViewModel> viewModels = _mapper.Map<IEnumerable<Translator>, List<TranslatorResponseViewModel>>(dbObjects);
+                return JsonResult(200, viewModels);
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
         }
 
         [HttpPost]
         public ActionResult Create(TranslatorRequestViewModel model)
         {
-            var create = _mapper.Map<Translator>(model);
-            return new JsonResult(_service.Create(create));
+            try
+            {
+                var create = _mapper.Map<Translator>(model);
+                return JsonResult(201, _service.Create(create));
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }            
         }
 
         [HttpPut]
         public ActionResult Update(TranslatorRequestViewModel model)
         {
-            var edit = _mapper.Map<Translator>(model);
-            _service.Update(edit);
-            return Ok();
+            try
+            {
+                var edit = _mapper.Map<Translator>(model);
+                _service.Update(edit);
+                return JsonResult(204, null);
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
         }
 
         [HttpPut("[action]")]
         public ActionResult UpdateStatus(int translatorId, TranslatorStatus status)
         {
-            _translatorService.UpdateStatus(translatorId, status);
-            return Ok();
+            try
+            {
+                _translatorService.UpdateStatus(translatorId, status);
+                return JsonResult(204, null);
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
         }
 
         [HttpPost("[action]")]
         public ActionResult AssignTranslator(int translatorId, int jobId)
         {
-            _translatorService.AssignTranslator(translatorId, jobId);
-            return Ok();
+            try
+            {
+                _translatorService.AssignTranslator(translatorId, jobId);
+                return JsonResult(200, null);
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
         }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            _service.Delete(id);
-            return Ok();
+            try
+            {
+                _service.Delete(id);
+                return JsonResult(200, null);
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
+        }
+
+        private JsonResult JsonResult(int code, object value)
+        {
+            return new JsonResult(value)
+            {
+                StatusCode = code
+            };
+        }
+
+        private JsonResult JsonErrorResult(Exception e)
+        {
+            if (e is ClientException)
+            {
+                return new JsonResult(e.Message)
+                {
+                    StatusCode = 400,
+                };
+            }
+            else
+            {
+                return new JsonResult(e.Message)
+                {
+                    StatusCode = 500,
+                };
+            }
         }
     }
 }

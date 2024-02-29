@@ -4,6 +4,7 @@ using System;
 using TranslationManagement.Api.Models;
 using TranslationManagement.Api.Repositories.Interfaces;
 using TranslationManagement.Api.Services.Interfaces;
+using TranslationManagement.Api.Extentions;
 
 namespace TranslationManagement.Api.Services.Implementation
 {
@@ -22,7 +23,7 @@ namespace TranslationManagement.Api.Services.Implementation
         {
             var entity = _repository.FirstOrDefault(entity => entity.Id == id);
             if (entity == null)
-                throw new Exception("Data not found");
+                throw new ClientException("Item not fount");
 
             return entity;
         }
@@ -60,10 +61,6 @@ namespace TranslationManagement.Api.Services.Implementation
         public void UpdateStatus(int translatorId, TranslatorStatus status)
         {
             //_logger.LogInformation("User status update request: " + newStatus + " for user " + Translator.ToString());
-            //if (TranslatorStatuses.Where(status => status == newStatus).Count() == 0)
-            //{
-            //    throw new ArgumentException("unknown status");
-            //}
             var entity = Get(translatorId);
             entity.Status = status;
             _repository.SaveChanges();
@@ -74,7 +71,7 @@ namespace TranslationManagement.Api.Services.Implementation
             var translator = Get(translatorId);
             if(translator.Status != TranslatorStatus.Certified)
             {
-                throw new Exception("Only Certified translators can work on jobs");
+                throw new ClientException("Only Certified translators can work on jobs");
             }
 
             var job = _repositoryJob.FirstOrDefault(j=>j.Id == jobId);
@@ -86,7 +83,7 @@ namespace TranslationManagement.Api.Services.Implementation
             }
             else
             {
-                throw new Exception("Job not found");
+                throw new ClientException("Job not found");
             }
             
         }

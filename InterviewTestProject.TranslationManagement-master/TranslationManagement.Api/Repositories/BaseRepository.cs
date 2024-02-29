@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using TranslationManagement.Api.Extentions;
 using TranslationManagement.Api.Models;
 using TranslationManagement.Api.Repositories.Interfaces;
 
@@ -35,7 +36,7 @@ namespace TranslationManagement.Api.Repositories
         {
             if (entity == null)
             {
-                throw new ArgumentNullException(nameof(entity));
+                throw new ClientException("Item not fount");
             }
 
             return _dbSet.Value.Add(entity).Entity;
@@ -45,7 +46,7 @@ namespace TranslationManagement.Api.Repositories
         {
             if (entity == null)
             {
-                throw new ArgumentNullException(nameof(entity));
+                throw new ClientException("Item not fount");
             }
 
             var edit = FirstOrDefault(e => e.Id == entity.Id);
@@ -59,7 +60,7 @@ namespace TranslationManagement.Api.Repositories
         {
             if (entity == null)
             {
-                throw new ArgumentNullException(nameof(entity));
+                throw new ClientException("Item not fount");
             }
 
             _dbSet.Value.Remove(entity);

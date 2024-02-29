@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TranslationManagement.Api.Controlers;
+using TranslationManagement.Api.Extentions;
 using TranslationManagement.Api.Models;
 using TranslationManagement.Api.Services.Implementation;
 using TranslationManagement.Api.Services.Interfaces;
@@ -21,7 +22,7 @@ namespace TranslationManagement.Api.Controllers
 {
     [ApiController]
     [Route("/api/[controller]")]
-    public class TranslationJobController : ControllerBase //: BaseController<TranslationJob>
+    public class TranslationJobController : ControllerBase //, BaseController<TranslationJob>
     {
         IBaseService<TranslationJob> _service;
         ITranslationJobService _translationJobService;
@@ -41,22 +42,44 @@ namespace TranslationManagement.Api.Controllers
         [HttpGet]
         public ActionResult Get()
         {
-            var dbObjects = _service.GetAll();
-            List<TranslationJobResponseViewModel> viewModels = _mapper.Map<IEnumerable<TranslationJob>, List<TranslationJobResponseViewModel>>(dbObjects);
-            return new JsonResult(viewModels);
+            try
+            {
+                var dbObjects = _service.GetAll().ToList();
+                List<TranslationJobResponseViewModel> viewModels = _mapper.Map<List<TranslationJob>, List<TranslationJobResponseViewModel>>(dbObjects);
+                return JsonResult(200, viewModels);
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
         }
 
         [HttpPost]
         public ActionResult Create(TranslationJobRequestViewModel model)
         {
-            var create = _mapper.Map<TranslationJob>(model);
-            return new JsonResult(_service.Create(create));
+            try
+            {
+                var create = _mapper.Map<TranslationJob>(model);
+                return JsonResult(201, _service.Create(create));
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
         }
 
         [HttpPost("[action]")]
         public ActionResult CreateWithFile(IFormFile file, string customerName = "")
         {
-            return new JsonResult(_translationJobService.CreateJobWithFile(file, customerName));
+            try
+            {
+                _translationJobService.CreateJobWithFile(file, customerName);
+                return JsonResult(201, null);
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
         }
 
         /// <summary>
@@ -79,20 +102,67 @@ namespace TranslationManagement.Api.Controllers
         [HttpGet("[action]")]
         public ActionResult GetOriginalContentFile(int jobId)
         {
-            return new JsonResult(_service.Get(jobId).OriginalContent);
+            try
+            {
+                return JsonResult(200, _service.Get(jobId).OriginalContent);
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
         }
 
         [HttpGet("[action]")]
         public ActionResult GetTranslatedContentFile(int jobId)
         {
-            return new JsonResult(_service.Get(jobId).TranslatedContent);
+            try
+            {
+                return JsonResult(200, _service.Get(jobId).TranslatedContent);
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
         }
 
         [HttpPut("[action]")]
         public ActionResult UpdateJobStatus(int jobId, int translatorId, JobStatus status)
         {
-            _translationJobService.UpdateJobStatus(jobId, status);
-            return Ok();
+            try
+            {
+                _translationJobService.UpdateJobStatus(jobId, status);
+                return JsonResult(204, null);
+            }
+            catch (Exception e)
+            {
+                return JsonErrorResult(e);
+            }
+        }
+
+        private JsonResult JsonResult(int code, object value)
+        {
+            return new JsonResult(value)
+            {
+                StatusCode = code
+            };
+        }
+
+        private JsonResult JsonErrorResult(Exception e)
+        {
+            if (e is ClientException)
+            {
+                return new JsonResult(e.Message)
+                {
+                    StatusCode= 400,
+                };
+            }
+            else
+            {
+                return new JsonResult(e.Message)
+                {
+                    StatusCode = 500,
+                };
+            }
         }
     }
 }

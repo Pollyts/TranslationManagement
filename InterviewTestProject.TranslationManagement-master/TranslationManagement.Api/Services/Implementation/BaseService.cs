@@ -6,6 +6,7 @@ using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 using TranslationManagement.Api.Services.Interfaces;
+using TranslationManagement.Api.Extentions;
 
 namespace TranslationManagement.Api.Services.Implementation
 {
@@ -37,7 +38,7 @@ namespace TranslationManagement.Api.Services.Implementation
         {
             var entity = _repository.FirstOrDefault(entity => entity.Id == id);
             if (entity == null)
-                throw new Exception("Данные не найдены");
+                throw new ClientException("Item not fount");
 
             return entity;
         }

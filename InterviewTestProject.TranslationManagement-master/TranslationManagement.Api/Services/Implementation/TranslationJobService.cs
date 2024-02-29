@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +11,8 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using TranslationManagement.Api.Controlers;
+using TranslationManagement.Api.Extentions;
 using TranslationManagement.Api.Models;
 using TranslationManagement.Api.Repositories;
 using TranslationManagement.Api.Repositories.Interfaces;
@@ -19,25 +22,20 @@ namespace TranslationManagement.Api.Services.Implementation
 {
     public class TranslationJobService : IBaseService<TranslationJob>, ITranslationJobService
     {
+        private readonly ILogger<TranslationJobService> _logger;
         protected readonly IBaseRepository<TranslationJob> _repository;
         const double PricePerCharacter = 0.01;
-        public TranslationJobService(IBaseRepository<TranslationJob> repository)
+        public TranslationJobService(IBaseRepository<TranslationJob> repository,
+            ILogger<TranslationJobService> logger)
         {
             _repository = repository;
         }
 
-        
-
-    //        if (job.Translator.Status != TranslatorStatus.Certified)
-    //        {
-    //            throw new Exception("only Certified translators can work on jobs");
-    //}
-
-    public virtual TranslationJob Get(int id)
+        public virtual TranslationJob Get(int id)
         {
             var entity = _repository.FirstOrDefault(entity => entity.Id == id);
             if (entity == null)
-                throw new Exception("Данные не найдены");
+                throw new ClientException("Item not fount");
 
             return entity;
         }
@@ -111,7 +109,7 @@ namespace TranslationManagement.Api.Services.Implementation
                     create = ParseXML(file);
                     break;
                 default:
-                    throw new NotSupportedException("unsupported file");
+                    throw new ClientException("Unsupported file");
 
             };
 
@@ -120,9 +118,9 @@ namespace TranslationManagement.Api.Services.Implementation
 
         public void UpdateJobStatus(int jobId, JobStatus status)
         {
-            //_logger.LogInformation("Job status update request received: " + newStatus + " for job " + jobId.ToString() + " by translator " + translatorId);
+            var job = Get(jobId);
 
-            var job = Get(jobId);            
+            _logger.LogInformation("Job status update request received: " + status + " for job " + jobId.ToString() + " by translator " + job.Translator.Name);                                  
 
             if (job.Status == JobStatus.New && status == JobStatus.Completed 
                 || job.Status == JobStatus.Completed
