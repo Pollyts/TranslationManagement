@@ -10,17 +10,19 @@ namespace TranslationManagement.Api.Services.Implementation
     public class TranslatorService : IBaseService<Translator> , ITranslatorService
     {
         protected readonly IBaseRepository<Translator> _repository;
+        protected readonly IBaseRepository<TranslationJob> _repositoryJob;
 
-        public TranslatorService(IBaseRepository<Translator> repository)
+        public TranslatorService(IBaseRepository<Translator> repository, IBaseRepository<TranslationJob> repositoryJob)
         {
             _repository = repository;
-        }        
+            _repositoryJob = repositoryJob;
+        }
 
         public virtual Translator Get(int id)
         {
             var entity = _repository.FirstOrDefault(entity => entity.Id == id);
             if (entity == null)
-                throw new Exception("Данные не найдены");
+                throw new Exception("Data not found");
 
             return entity;
         }
@@ -65,6 +67,28 @@ namespace TranslationManagement.Api.Services.Implementation
             var entity = Get(translatorId);
             entity.Status = status;
             _repository.SaveChanges();
+        }
+
+        public void AssignTranslator(int translatorId, int jobId)
+        {
+            var translator = Get(translatorId);
+            if(translator.Status != TranslatorStatus.Certified)
+            {
+                throw new Exception("Only Certified translators can work on jobs");
+            }
+
+            var job = _repositoryJob.FirstOrDefault(j=>j.Id == jobId);
+            if(job != null)
+            {
+                job.TranslatorId = translatorId;
+                _repositoryJob.Update(job);
+                _repositoryJob.SaveChanges();
+            }
+            else
+            {
+                throw new Exception("Job not found");
+            }
+            
         }
     }
 }

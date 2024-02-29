@@ -12,6 +12,8 @@ using TranslationManagement.Api.Models;
 using System.Linq;
 using System.Reflection;
 using TranslationManagement.Api.Repositories.Interfaces;
+using Microsoft.AspNetCore.Http;
+using System;
 
 namespace TranslationManagement.Api
 {
@@ -31,7 +33,7 @@ namespace TranslationManagement.Api
 
             string connection = Configuration.GetConnectionString("Default");
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite("Data Source=TranslationAppDatabase.db"));
+                options.UseLazyLoadingProxies().UseSqlite("Data Source=TranslationAppDatabase.db"));
 
             var _entitiesModelsAssemblies =
                 new Assembly[]
@@ -50,11 +52,14 @@ namespace TranslationManagement.Api
                 }
             }
 
+
             services.AddScoped<ITranslatorService, TranslatorService>();
             services.AddScoped<IBaseService<Translator>, TranslatorService>();
 
             services.AddScoped<ITranslationJobService, TranslationJobService>();
             services.AddScoped<IBaseService<TranslationJob>, TranslationJobService>();
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddSwaggerGen(c =>
             {

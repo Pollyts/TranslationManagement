@@ -8,5 +8,11 @@
         public string OriginalContent { get; set; }
         public string TranslatedContent { get; set; }
         public double Price { get; set; }
+
+        #region navigation
+        public int? TranslatorId { get; set; }
+        public virtual Translator Translator { get; set; }
+
+        #endregion
     }
 }

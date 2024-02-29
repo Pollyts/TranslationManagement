@@ -14,7 +14,6 @@ using TranslationManagement.Api.Models;
 using TranslationManagement.Api.Repositories;
 using TranslationManagement.Api.Repositories.Interfaces;
 using TranslationManagement.Api.Services.Interfaces;
-using TranslationManagement.Api.ViewModels;
 
 namespace TranslationManagement.Api.Services.Implementation
 {
@@ -27,7 +26,14 @@ namespace TranslationManagement.Api.Services.Implementation
             _repository = repository;
         }
 
-        public virtual TranslationJob Get(int id)
+        
+
+    //        if (job.Translator.Status != TranslatorStatus.Certified)
+    //        {
+    //            throw new Exception("only Certified translators can work on jobs");
+    //}
+
+    public virtual TranslationJob Get(int id)
         {
             var entity = _repository.FirstOrDefault(entity => entity.Id == id);
             if (entity == null)
@@ -92,21 +98,23 @@ namespace TranslationManagement.Api.Services.Implementation
             _repository.SaveChanges();
         }
 
-        public int CreateJobWithFile(IFormFile file, string customerName)
+        public int CreateJobWithFile(IFormFile file, string customerName = "")
         {
             TranslationJob create = null;
-            if (file.FileName.EndsWith(".txt"))
+            switch (file.FileName.Split(".").Last())
             {
-                create = ParseTxt(file);
-            }
-            else if (file.FileName.EndsWith(".xml"))
-            {
-                create = ParseXML(file);
-            }
-            else
-            {
-                throw new NotSupportedException("unsupported file");
-            }
+                case ".txt":
+                    create = ParseTxt(file);
+                    create.CustomerName = customerName;
+                    break;
+                case ".xml":
+                    create = ParseXML(file);
+                    break;
+                default:
+                    throw new NotSupportedException("unsupported file");
+
+            };
+
             return Create(create);
         }
 
@@ -114,9 +122,9 @@ namespace TranslationManagement.Api.Services.Implementation
         {
             //_logger.LogInformation("Job status update request received: " + newStatus + " for job " + jobId.ToString() + " by translator " + translatorId);
 
-            var job = Get(jobId);
+            var job = Get(jobId);            
 
-            if(job.Status == JobStatus.New && status == JobStatus.Completed 
+            if (job.Status == JobStatus.New && status == JobStatus.Completed 
                 || job.Status == JobStatus.Completed
                 || status == JobStatus.New
                 || job.Status == status)

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using TranslationManagement.Api.Models;
-using TranslationManagement.Api.ViewModels;
 
 namespace TranslationManagement.Api.Services.Interfaces
 {
@@ -8,6 +7,7 @@ namespace TranslationManagement.Api.Services.Interfaces
     {
         IEnumerable<Translator> GetByName(string name);
         void UpdateStatus(int translatorId, TranslatorStatus status);
+        void AssignTranslator(int translatorId, int jobId);
         //IEnumerable<Translator> GetAll();
         //Translator Get(int id);
         //int Create(Translator create);

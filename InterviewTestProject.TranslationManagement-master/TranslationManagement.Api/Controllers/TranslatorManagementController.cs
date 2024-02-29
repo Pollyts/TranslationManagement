@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using TranslationManagement.Api.Controllers;
 using TranslationManagement.Api.Models;
 using TranslationManagement.Api.Services.Interfaces;
+using TranslationManagement.Api.ViewModels;
 
 namespace TranslationManagement.Api.Controlers
 {
@@ -16,13 +18,16 @@ namespace TranslationManagement.Api.Controlers
     {
         IBaseService<Translator> _service;
         ITranslatorService _translatorService;
+        private readonly IMapper _mapper;
 
         public TranslatorManagementController(IBaseService<Translator> service,
+            IMapper mapper,
             ITranslatorService translatorService)
             //:base(service)
         {
             _service = service;
             _translatorService = translatorService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -44,15 +49,17 @@ namespace TranslationManagement.Api.Controlers
         }
 
         [HttpPost]
-        public ActionResult Create(Translator create)
+        public ActionResult Create(TranslatorRequestViewModel model)
         {
+            var create = _mapper.Map<Translator>(model);
             return new JsonResult(_service.Create(create));
         }
 
         [HttpPut]
-        public ActionResult Update(Translator create)
+        public ActionResult Update(TranslatorRequestViewModel model)
         {
-            _service.Update(create);
+            var edit = _mapper.Map<Translator>(model);
+            _service.Update(edit);
             return Ok();
         }
 
@@ -60,6 +67,20 @@ namespace TranslationManagement.Api.Controlers
         public ActionResult UpdateStatus(int translatorId, TranslatorStatus status)
         {
             _translatorService.UpdateStatus(translatorId, status);
+            return Ok();
+        }
+
+        [HttpPost("[action]")]
+        public ActionResult AssignTranslator(int translatorId, int jobId)
+        {
+            _translatorService.AssignTranslator(translatorId, jobId);
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            _service.Delete(id);
             return Ok();
         }
     }

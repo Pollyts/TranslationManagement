@@ -1,4 +1,6 @@
-﻿namespace TranslationManagement.Api.Models
+﻿using System.Collections.Generic;
+
+namespace TranslationManagement.Api.Models
 {
     public class Translator: IEntityDb
     {
@@ -7,5 +9,9 @@
         public string HourlyRate { get; set; }
         public TranslatorStatus Status { get; set; }
         public string CreditCardNumber { get; set; }
+
+        #region navigation
+        public virtual List<TranslationJob> TranslationJobs { get; set; }
+        #endregion
     }
 }
