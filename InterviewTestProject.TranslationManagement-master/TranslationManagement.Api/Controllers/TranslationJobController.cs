@@ -126,7 +126,7 @@ namespace TranslationManagement.Api.Controllers
         }
 
         [HttpPut("[action]")]
-        public ActionResult UpdateJobStatus(int jobId, int translatorId, JobStatus status)
+        public ActionResult UpdateJobStatus(int jobId, JobStatus status)
         {
             try
             {

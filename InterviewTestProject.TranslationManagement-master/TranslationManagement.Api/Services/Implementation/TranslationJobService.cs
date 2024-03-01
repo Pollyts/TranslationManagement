@@ -29,6 +29,7 @@ namespace TranslationManagement.Api.Services.Implementation
             ILogger<TranslationJobService> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         public virtual TranslationJob Get(int id)
@@ -127,7 +128,7 @@ namespace TranslationManagement.Api.Services.Implementation
                 || status == JobStatus.New
                 || job.Status == status)
             {
-                throw new Exception("Can`t change status: the work is already in this status or completed");
+                throw new ClientException("Can`t change status: the work is already in this status or completed");
             }
 
             job.Status = status;
