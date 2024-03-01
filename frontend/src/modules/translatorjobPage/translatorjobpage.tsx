@@ -8,7 +8,6 @@ export const TranslatorJobPage: React.FC = () => {
   const [anchorElTranslator, setAnchorElTranslator] = useState<null | HTMLElement>(null);
   const [selectedJob, setSelectedJob] = useState<TranslationJob | null>(null);
   const [translators, setTranslators] = useState<Translator[]>([]);
-  const [selectedTranslator, setSelectedTranslator] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
