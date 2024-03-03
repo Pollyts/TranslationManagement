@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Box, Grid } from '@mui/material';
 import './App.css';
 import { TranslatorPage } from '../src/modules/translatorPage/translatorPage';
-import { TranslatorJobPage } from '../src/modules/translatorjobPage/translatorjobpage';
+import { TranslatorJobPage } from '../src/modules/translatorjobPage/translatorjobPage';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'TranslatorPage' | 'TranslatorJobPage'>('TranslatorJobPage');

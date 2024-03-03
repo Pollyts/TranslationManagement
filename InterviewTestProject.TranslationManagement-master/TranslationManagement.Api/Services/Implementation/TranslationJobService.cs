@@ -121,7 +121,7 @@ namespace TranslationManagement.Api.Services.Implementation
         {
             var job = Get(jobId);
 
-            _logger.LogInformation("Job status update request received: " + status + " for job " + jobId.ToString() + " by translator " + job.Translator.Name);                                  
+            _logger.LogInformation("Job status update request received: " + status + " for job " + jobId.ToString() + " by translator " + job.Translator?.Name);                                  
 
             if (job.Status == JobStatus.New && status == JobStatus.Completed 
                 || job.Status == JobStatus.Completed

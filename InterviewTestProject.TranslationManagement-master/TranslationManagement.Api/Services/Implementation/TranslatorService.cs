@@ -5,6 +5,7 @@ using TranslationManagement.Api.Models;
 using TranslationManagement.Api.Repositories.Interfaces;
 using TranslationManagement.Api.Services.Interfaces;
 using TranslationManagement.Api.Extentions;
+using Microsoft.Extensions.Logging;
 
 namespace TranslationManagement.Api.Services.Implementation
 {
@@ -12,11 +13,15 @@ namespace TranslationManagement.Api.Services.Implementation
     {
         protected readonly IBaseRepository<Translator> _repository;
         protected readonly IBaseRepository<TranslationJob> _repositoryJob;
+        private readonly ILogger<TranslationJobService> _logger;
 
-        public TranslatorService(IBaseRepository<Translator> repository, IBaseRepository<TranslationJob> repositoryJob)
+        public TranslatorService(IBaseRepository<Translator> repository,
+            IBaseRepository<TranslationJob> repositoryJob,
+            ILogger<TranslationJobService> logger)
         {
             _repository = repository;
             _repositoryJob = repositoryJob;
+            _logger = logger;
         }
 
         public virtual Translator Get(int id)
@@ -59,9 +64,9 @@ namespace TranslationManagement.Api.Services.Implementation
         }
 
         public void UpdateStatus(int translatorId, TranslatorStatus status)
-        {
-            //_logger.LogInformation("User status update request: " + newStatus + " for user " + Translator.ToString());
+        {            
             var entity = Get(translatorId);
+            _logger.LogInformation("User status update request: " + status + " for user " + entity.Name);
             entity.Status = status;
             _repository.SaveChanges();
         }
